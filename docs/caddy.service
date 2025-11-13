@@ -1,0 +1,36 @@
+# /etc/systemd/system/caddy.service
+# systemd configuration for Caddy
+#
+# Example Caddy configuration:
+#
+#   cp Caddyfile /etc/caddy/Caddyfile
+#   cp caddy.service /etc/systemd/system/caddy.service
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now caddy
+#
+# Note: The services that Caddy proxies are managed by pm2:
+#
+#   npm -g install pm2
+#   <configure and install services and save pm2>
+#   pm2 startup
+
+[Unit]
+Description=Caddy
+Documentation=https://caddyserver.com/docs/
+After=network.target
+
+[Service]
+Type=notify
+User=caddy
+Group=caddy
+ExecStart=/usr/bin/caddy run --environ --config /etc/caddy/Caddyfile
+ExecReload=/usr/bin/caddy reload --config /etc/caddy/Caddyfile
+TimeoutStopSec=5s
+LimitNOFILE=1048576
+LimitNPROC=512
+PrivateTmp=true
+ProtectSystem=full
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+
+[Install]
+WantedBy=multi-user.target

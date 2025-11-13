@@ -1,0 +1,89 @@
+# Contents of /etc/caddy/Caddyfile
+#
+# Simple configuration for Caddy (https://caddyserver.com) web server
+# Caddy acts a reverse proxy and handles dynamic SSL certificate generation.
+#
+# Test changes:
+#               caddy validate --config /etc/caddy/Caddyfile
+#
+# Apply changes:
+#               sudo systemctl restart caddy
+#
+# Note: Any of the domains can be used for the API endpoints but the website
+# is configured to use a single canonical domain to help avoid confusion.
+
+ardentinsight.com,
+ardentindustry.com,
+ardent-industry.com,
+www.ardentinsight.com,
+www.ardent-insight.com,
+www.ardentindustry.com,
+www.ardent-industry.com {
+        redir https://ardent-insight.com{uri} permanent
+}
+
+ardent-insight.com {
+        reverse_proxy http://127.0.0.1:3000 {
+                lb_try_duration 10s
+        }
+        log {
+                output file /var/log/caddy/www-access.log
+        }
+}
+
+beta.ardent-insight.com {
+        reverse_proxy http://127.0.0.1:3000 {
+                lb_try_duration 10s
+        }
+        log {
+                output file /var/log/caddy/beta-access.log
+        }
+}
+
+api.beta.ardent-insight.com,
+api.ardentinsight.com,
+api.ardent-insight.com,
+api.ardentindustry.com,
+api.ardent-industry.com {
+        rewrite * /api{uri}
+        reverse_proxy http://127.0.0.1:3001 {
+                lb_try_duration 10s
+        }
+        log {
+                output file /var/log/caddy/api-access.log
+        }
+}
+
+auth.beta.ardent-insight.com,
+auth.ardentinsight.com,
+auth.ardent-insight.com,
+auth.ardentindustry.com,
+auth.ardent-industry.com {
+        rewrite * /auth{uri}
+        reverse_proxy http://127.0.0.1:3003 {
+                lb_try_duration 10s
+        }
+        log {
+                output file /var/log/caddy/auth-access.log
+        }
+}
+
+downloads.beta.ardent-insight.com,
+downloads.ardentinsight.com,
+downloads.ardent-insight.com,
+downloads.ardentindustry.com,
+downloads.ardent-industry.com {
+        file_server {
+                root /opt/ardent/ardent-downloads
+                index index.html
+        }
+        log {
+                output file /var/log/caddy/downloads-access.log
+        }
+}
+
+:80, :443 {
+        respond "Access denied" 403 {
+                close
+        }
+}
