@@ -1,39 +1,49 @@
 {
   "name": "ardent-auth",
-  "version": "2.0.0",
-  "description": "Ardent Authentication service",
+  "version": "3.0.0",
+  "description": "Ardent Authentication service - Node.js 24 Edition",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "dev": "cross-env NODE_ENV=development node index.js",
     "dev:local": "cross-env NODE_ENV=development ARDENT_WWW_BASE_URL=http://localhost:3000 ARDENT_AUTH_BASE_URL=http://localhost:3003/auth ARDENT_AUTH_COOKIE_DOMAIN=.localhost node index.js",
-    "lint": "npx standard --fix"
+    "lint": "npx standard --fix",
+    "backup": "node scripts/backup.js",
+    "stats": "node scripts/stats/database-stats.js",
+    "optimize": "node scripts/optimize.js",
+    "deploy": "node scripts/deploy.js",
+    "docker:build": "docker build -t eddata-auth .",
+    "docker:run": "docker-compose up -d",
+    "docker:logs": "docker-compose logs -f",
+    "docker:stop": "docker-compose down"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/iaincollins/ardent-auth.git"
+    "url": "git+https://github.com/EDDataAPI/eddata-auth.git"
   },
-  "author": "",
+  "author": "EDDataAPI",
   "license": "AGPL-3.0",
   "bugs": {
-    "url": "https://github.com/iaincollins/ardent-auth/issues"
+    "url": "https://github.com/EDDataAPI/eddata-auth/issues"
   },
-  "homepage": "https://github.com/iaincollins/ardent-auth#readme",
+  "homepage": "https://github.com/EDDataAPI/eddata-auth#readme",
   "dependencies": {
-    "better-sqlite3": "^8.3.0",
+    "@koa/router": "^13.1.0",
+    "better-sqlite3": "^11.7.0",
+    "byte-size": "^9.0.0",
     "cross-env": "^7.0.3",
-    "dotenv": "^16.0.3",
+    "dotenv": "^16.4.7",
     "jsonwebtoken": "^9.0.2",
-    "koa": "^2.14.2",
-    "koa-bodyparser": "^4.4.0",
-    "koa-router": "^12.0.0",
+    "koa": "^2.15.3",
+    "koa-bodyparser": "^4.4.1",
+    "keygrip": "^1.1.0",
     "node-cron": "^3.0.3"
   },
   "devDependencies": {
-    "standard": "^17.1.0"
+    "standard": "^17.1.2"
   },
   "engines": {
-    "npm": "9.6.7",
-    "node": "18.17.1"
+    "npm": ">=10.8.0",
+    "node": ">=24.11.0"
   }
 }

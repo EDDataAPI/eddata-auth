@@ -1,0 +1,79 @@
+# Multi-stage build for optimal image size and security
+FROM node:24.11.0-alpine AS base
+
+# Install system dependencies for native modules
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    && rm -rf /var/cache/apk/*
+
+# Build stage
+FROM base AS builder
+
+WORKDIR /app
+
+# Copy package files first for better caching
+COPY package*.json ./
+
+# Install all dependencies (including devDependencies for building native modules)
+RUN npm ci --include=dev && \
+    npm rebuild better-sqlite3 && \
+    npm prune --production && \
+    npm cache clean --force
+
+# Production stage
+FROM base AS production
+
+# Create app user for security
+RUN addgroup -g 1001 -S ardent && \
+    adduser -S ardent -u 1001 -G ardent
+
+# Set working directory
+WORKDIR /app
+
+# Copy built node_modules from builder stage
+COPY --from=builder --chown=ardent:ardent /app/node_modules ./node_modules
+
+# Copy package files
+COPY --chown=ardent:ardent package*.json ./
+
+# Copy application files
+COPY --chown=ardent:ardent . .
+
+# Create necessary directories with correct permissions
+RUN mkdir -p /app/ardent-data/cache && \
+    mkdir -p /app/ardent-data/backup && \
+    chown -R ardent:ardent /app
+
+# Switch to non-root user
+USER ardent
+
+# Expose port (default 3003)
+EXPOSE 3003
+
+# Add labels for better maintainability
+LABEL org.opencontainers.image.title="Ardent Authentication"
+LABEL org.opencontainers.image.description="Elite Dangerous Authentication Service"
+LABEL org.opencontainers.image.vendor="EDDataAPI"
+LABEL org.opencontainers.image.source="https://github.com/EDDataAPI/eddata-auth"
+
+# Health check with robust endpoint testing
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD node -e " \
+        const http = require('http'); \
+        const options = { \
+            hostname: 'localhost', \
+            port: process.env.ARDENT_AUTH_LOCAL_PORT || 3003, \
+            path: '/health', \
+            timeout: 5000 \
+        }; \
+        const req = http.request(options, (res) => { \
+            process.exit(res.statusCode === 200 ? 0 : 1); \
+        }); \
+        req.on('error', () => process.exit(1)); \
+        req.on('timeout', () => process.exit(1)); \
+        req.end();" || exit 1
+
+# Start application
+CMD ["npm", "start"]

@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  eddata-auth:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: eddata-auth
+    restart: unless-stopped
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=production
+      - ARDENT_AUTH_LOCAL_PORT=3003
+      - ARDENT_DATA_DIR=/app/ardent-data
+      # Mount your own .env file or set these:
+      # - ARDENT_SESSION_SECRET=your-secret-here
+      # - ARDENT_AUTH_JWT_SECRET=your-jwt-secret-here
+      # - ARDENT_AUTH_CLIENT_ID=your-client-id
+      # - ARDENT_DOMAIN=your-domain.com
+    volumes:
+      - ardent-data:/app/ardent-data
+      - ardent-backup:/app/ardent-data/backup
+    networks:
+      - eddata-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3003/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  ardent-data:
+    driver: local
+  ardent-backup:
+    driver: local
+
+networks:
+  eddata-network:
+    driver: bridge
