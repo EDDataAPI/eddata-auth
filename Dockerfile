@@ -26,34 +26,34 @@ RUN npm ci --include=dev && \
 FROM base AS production
 
 # Create app user for security
-RUN addgroup -g 1001 -S ardent && \
-    adduser -S ardent -u 1001 -G ardent
+RUN addgroup -g 1001 -S eddata && \
+    adduser -S eddata -u 1001 -G eddata
 
 # Set working directory
 WORKDIR /app
 
 # Copy built node_modules from builder stage
-COPY --from=builder --chown=ardent:ardent /app/node_modules ./node_modules
+COPY --from=builder --chown=eddata:eddata /app/node_modules ./node_modules
 
 # Copy package files
-COPY --chown=ardent:ardent package*.json ./
+COPY --chown=eddata:eddata package*.json ./
 
 # Copy application files
-COPY --chown=ardent:ardent . .
+COPY --chown=eddata:eddata . .
 
 # Create necessary directories with correct permissions
-RUN mkdir -p /app/ardent-data/cache && \
-    mkdir -p /app/ardent-data/backup && \
-    chown -R ardent:ardent /app
+RUN mkdir -p /app/eddata-data/cache && \
+    mkdir -p /app/eddata-data/backup && \
+    chown -R eddata:eddata /app
 
 # Switch to non-root user
-USER ardent
+USER eddata
 
 # Expose port (default 3003)
 EXPOSE 3003
 
 # Add labels for better maintainability
-LABEL org.opencontainers.image.title="Ardent Authentication"
+LABEL org.opencontainers.image.title="EDData Authentication"
 LABEL org.opencontainers.image.description="Elite Dangerous Authentication Service"
 LABEL org.opencontainers.image.vendor="EDDataAPI"
 LABEL org.opencontainers.image.source="https://github.com/EDDataAPI/eddata-auth"
@@ -64,7 +64,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
         const http = require('http'); \
         const options = { \
             hostname: 'localhost', \
-            port: process.env.ARDENT_AUTH_LOCAL_PORT || 3003, \
+            port: process.env.EDDATA_AUTH_LOCAL_PORT || 3003, \
             path: '/health', \
             timeout: 5000 \
         }; \

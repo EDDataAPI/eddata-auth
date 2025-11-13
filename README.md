@@ -1,9 +1,9 @@
-# Ardent Authentication Service - Node.js 24 Edition
+# EDData Authentication Service - Node.js 24 Edition
 
 ![Node.js](https://img.shields.io/badge/node-%3E%3D24.11.0-brightgreen)
 ![License](https://img.shields.io/badge/license-AGPL--3.0-blue)
 
-Authentication service for Ardent Insight - providing secure OAuth integration with Frontier Developments' Elite Dangerous API.
+Authentication service for EDData - providing secure OAuth integration with Frontier Developments' Elite Dangerous API.
 
 ## 🚀 What's New in v3.0
 
@@ -30,8 +30,8 @@ git clone https://github.com/EDDataAPI/eddata-auth.git
 cd eddata-auth
 
 # Configure environment
-cp .env.example ardent.config
-# Edit ardent.config with your settings
+cp .env.example eddata.config
+# Edit eddata.config with your settings
 
 # Start with Docker Compose
 docker-compose up -d
@@ -50,8 +50,8 @@ curl http://localhost:3003/health
 npm install
 
 # Configure environment
-cp .env.example ardent.config
-# Edit ardent.config with your settings
+cp .env.example eddata.config
+# Edit eddata.config with your settings
 
 # Start in development
 npm run dev
@@ -64,26 +64,26 @@ npm start
 
 ### Environment Variables
 
-Create an `ardent.config` file in the project root:
+Create an `eddata.config` file in the project root:
 
 ```bash
 # Domain configuration
-ARDENT_DOMAIN=your-domain.com
-ARDENT_AUTH_BASE_URL=https://auth.your-domain.com
-ARDENT_WWW_BASE_URL=https://your-domain.com
+EDDATA_DOMAIN=your-domain.com
+EDDATA_AUTH_BASE_URL=https://auth.your-domain.com
+EDDATA_WWW_BASE_URL=https://your-domain.com
 
 # Security (REQUIRED - generate strong secrets!)
-ARDENT_SESSION_SECRET=your-long-random-session-secret
-ARDENT_AUTH_JWT_SECRET=your-long-random-jwt-secret
+EDDATA_SESSION_SECRET=your-long-random-session-secret
+EDDATA_AUTH_JWT_SECRET=your-long-random-jwt-secret
 
 # Frontier OAuth
-ARDENT_AUTH_CLIENT_ID=your-frontier-client-id
+EDDATA_AUTH_CLIENT_ID=your-frontier-client-id
 
 # Cookie configuration
-ARDENT_AUTH_COOKIE_DOMAIN=.your-domain.com
+EDDATA_AUTH_COOKIE_DOMAIN=.your-domain.com
 
 # Server
-ARDENT_AUTH_LOCAL_PORT=3003
+EDDATA_AUTH_LOCAL_PORT=3003
 NODE_ENV=production
 ```
 
@@ -206,12 +206,32 @@ Response:
 
 ```bash
 npm run stats
-cat ardent-data/cache/database-stats.json
+cat eddata-data/cache/database-stats.json
 ```
 
 ## 🐳 Docker Deployment
 
-### Build and Deploy
+### Dokploy (Recommended for Production)
+
+This project is optimized for deployment with [Dokploy](https://dokploy.com/):
+
+```bash
+# See DOKPLOY.md for detailed setup instructions
+```
+
+**Quick Setup:**
+1. Create project in Dokploy dashboard
+2. Connect GitHub repository
+3. Set environment variables (see DOKPLOY.md)
+4. Configure domain with automatic SSL
+5. Deploy
+
+The docker-compose.yml includes Traefik labels for:
+- Automatic SSL certificates (Let's Encrypt)
+- Load balancing and health checks
+- Security headers (HSTS, SSL redirect)
+
+### Manual Docker Deployment
 
 ```bash
 # Build image
@@ -227,7 +247,7 @@ docker-compose logs -f eddata-auth
 docker-compose down
 ```
 
-### Production Deployment
+### Production Deployment Script
 
 ```bash
 node scripts/deploy.js deploy --env=production
@@ -262,8 +282,8 @@ Elite Dangerous is copyright Frontier Developments plc. This software is not end
 
 ## 🙏 Acknowledgments
 
-Based on the original Ardent Insight project by Iain Collins.
-Modernized for Node.js 24 with patterns from eddata-collector.
+Based on the Ardent Insight project by Iain Collins.
+Modernized and rebranded as EDData for Node.js 24 with patterns from eddata-collector.
 
 ## 📞 Support
 

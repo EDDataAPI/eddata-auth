@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Ardent Auth Deployment Script
+ * EDData Auth Deployment Script
  * Manages Docker-based deployments for different environments
  */
 
@@ -97,7 +97,7 @@ class DeploymentManager {
 
   showHelp () {
     console.log(`
-Ardent Auth Deployment Manager
+EDData Auth Deployment Manager
 
 Usage: node deploy.js [command] [options]
 

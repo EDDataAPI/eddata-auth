@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   eddata-auth:
+    image: eddata-auth:latest
     build:
       context: .
       dockerfile: Dockerfile
@@ -11,31 +12,59 @@ services:
       - "3003:3003"
     environment:
       - NODE_ENV=production
-      - ARDENT_AUTH_LOCAL_PORT=3003
-      - ARDENT_DATA_DIR=/app/ardent-data
-      # Mount your own .env file or set these:
-      # - ARDENT_SESSION_SECRET=your-secret-here
-      # - ARDENT_AUTH_JWT_SECRET=your-jwt-secret-here
-      # - ARDENT_AUTH_CLIENT_ID=your-client-id
-      # - ARDENT_DOMAIN=your-domain.com
+      - EDDATA_AUTH_LOCAL_PORT=3003
+      - EDDATA_DATA_DIR=/app/eddata-data
+      # These should be set in Dokploy environment variables:
+      # - EDDATA_SESSION_SECRET
+      # - EDDATA_AUTH_JWT_SECRET
+      # - EDDATA_AUTH_CLIENT_ID
+      # - EDDATA_DOMAIN
+      # - EDDATA_AUTH_BASE_URL
+      # - EDDATA_WWW_BASE_URL
+      # - EDDATA_AUTH_COOKIE_DOMAIN
     volumes:
-      - ardent-data:/app/ardent-data
-      - ardent-backup:/app/ardent-data/backup
+      - eddata-data:/app/eddata-data
+      - eddata-backup:/app/eddata-data/backup
     networks:
-      - eddata-network
+      - dokploy-network
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3003/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 60s
+    labels:
+      # Dokploy labels
+      - "dokploy.project=eddata"
+      - "dokploy.service=auth"
+      - "dokploy.type=application"
+      
+      # Traefik labels for reverse proxy
+      - "traefik.enable=true"
+      - "traefik.http.routers.eddata-auth.rule=Host(`auth.eddata-api.com`)"
+      - "traefik.http.routers.eddata-auth.entrypoints=websecure"
+      - "traefik.http.routers.eddata-auth.tls=true"
+      - "traefik.http.routers.eddata-auth.tls.certresolver=letsencrypt"
+      - "traefik.http.services.eddata-auth.loadbalancer.server.port=3003"
+      
+      # Health check
+      - "traefik.http.services.eddata-auth.loadbalancer.healthcheck.path=/health"
+      - "traefik.http.services.eddata-auth.loadbalancer.healthcheck.interval=30s"
+      
+      # Security headers
+      - "traefik.http.middlewares.eddata-auth-headers.headers.customResponseHeaders.X-Robots-Tag=noindex,nofollow"
+      - "traefik.http.middlewares.eddata-auth-headers.headers.sslRedirect=true"
+      - "traefik.http.middlewares.eddata-auth-headers.headers.stsSeconds=31536000"
+      - "traefik.http.middlewares.eddata-auth-headers.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.eddata-auth-headers.headers.stsPreload=true"
+      - "traefik.http.routers.eddata-auth.middlewares=eddata-auth-headers"
 
 volumes:
-  ardent-data:
+  eddata-data:
     driver: local
-  ardent-backup:
+  eddata-backup:
     driver: local
 
 networks:
-  eddata-network:
-    driver: bridge
+  dokploy-network:
+    external: true

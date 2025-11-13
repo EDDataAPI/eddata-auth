@@ -21,13 +21,13 @@ for (const level of ['log', 'info', 'warn', 'error', 'debug']) {
   }
 }
 
-console.log(`Ardent Authentication v${Package.version} starting`)
+console.log(`EDData Authentication v${Package.version} starting`)
 
 // Initialize default value for env vars before other imports
 console.log('Configuring environment …')
 const {
-  ARDENT_AUTH_LOCAL_PORT,
-  ARDENT_DATA_DIR,
+  EDDATA_AUTH_LOCAL_PORT,
+  EDDATA_DATA_DIR,
   SESSION_SECRET
 } = require('./lib/consts')
 
@@ -63,12 +63,12 @@ function getMemoryInfo () {
 performanceMark('app-start')
 
 console.log('Ensuring required directories exist …')
-if (!fs.existsSync(ARDENT_DATA_DIR)) {
+if (!fs.existsSync(EDDATA_DATA_DIR)) {
   try {
-    fs.mkdirSync(ARDENT_DATA_DIR, { recursive: true })
-    console.log(`Created directory: ${ARDENT_DATA_DIR}`)
+    fs.mkdirSync(EDDATA_DATA_DIR, { recursive: true })
+    console.log(`Created directory: ${EDDATA_DATA_DIR}`)
   } catch (error) {
-    console.error(`Failed to create directory ${ARDENT_DATA_DIR}:`, error.message)
+    console.error(`Failed to create directory ${EDDATA_DATA_DIR}:`, error.message)
   }
 }
 
@@ -78,7 +78,7 @@ const cronTasks = require('./lib/cron-tasks')
 
 ;(async () => {
   // Start web service
-  console.log('Starting Ardent Authentication service')
+  console.log('Starting EDData Authentication service')
   const app = new Koa()
   app.use(koaBodyParser())
   app.keys = new KeyGrip([SESSION_SECRET], 'sha256') // Used to sign cookies
@@ -86,7 +86,7 @@ const cronTasks = require('./lib/cron-tasks')
 
   // Set default headers
   app.use((ctx, next) => {
-    ctx.set('Ardent-Auth-Version', `${Package.version}`)
+    ctx.set('EDData-Auth-Version', `${Package.version}`)
 
     // Requests made to the Authentication service should never be cached
     ctx.set('Cache-Control', 'private')
@@ -109,12 +109,12 @@ const cronTasks = require('./lib/cron-tasks')
   router.get('/', (ctx) => {
     const uptime = Math.round((performance.now() - startTime) / 1000)
     const memoryInfo = getMemoryInfo()
-    ctx.body = `Ardent Authentication v${Package.version}\n` +
+    ctx.body = `EDData Authentication v${Package.version}\n` +
       `Uptime: ${uptime}s\n` +
       `Memory: ${memoryInfo.heapUsed}MB / ${memoryInfo.heapTotal}MB\n` +
       `Node.js: ${process.version}`
   })
-  router.get('/auth', (ctx) => { ctx.body = `Ardent Authentication v${Package.version}` })
+  router.get('/auth', (ctx) => { ctx.body = `EDData Authentication v${Package.version}` })
   router.get('/auth/version', (ctx) => { ctx.body = { version: Package.version, node: process.version } })
   
   // Health check endpoint for load balancers (Node.js 24 optimized)
@@ -137,11 +137,11 @@ const cronTasks = require('./lib/cron-tasks')
     cronTasks.rotateAccessTokens()
   })
 
-  app.listen(ARDENT_AUTH_LOCAL_PORT)
+  app.listen(EDDATA_AUTH_LOCAL_PORT)
   
   performanceMark('app-ready')
-  console.log('Ardent Authentication service started!')
-  console.log(`Listening on port ${ARDENT_AUTH_LOCAL_PORT}`)
+  console.log('EDData Authentication service started!')
+  console.log(`Listening on port ${EDDATA_AUTH_LOCAL_PORT}`)
   console.log(`Startup time: ${Math.round(performance.now() - startTime)}ms`)
 })()
 

@@ -1,7 +1,7 @@
 {
-  "name": "ardent-auth",
+  "name": "eddata-auth",
   "version": "3.0.0",
-  "description": "Ardent Authentication service - Node.js 24 Edition",
+  "description": "EDData Authentication service - Node.js 24 Edition",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",

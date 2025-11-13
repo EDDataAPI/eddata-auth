@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Ardent Auth Database Backup Script
+ * EDData Auth Database Backup Script
  * Creates verified backups of the authentication database
  */
 
@@ -10,9 +10,9 @@ const fs = require('fs')
 const { authDb } = require('../lib/db')
 const { backupDatabase, verifyBackup, writeBackupLog } = require('../lib/backup')
 const {
-  ARDENT_AUTH_DB,
-  ARDENT_BACKUP_DIR,
-  ARDENT_DATA_DIR
+  EDDATA_AUTH_DB,
+  EDDATA_BACKUP_DIR,
+  EDDATA_DATA_DIR
 } = require('../lib/consts')
 
 ;(async () => {
@@ -21,12 +21,12 @@ const {
   writeBackupLog('Starting backup process', true)
 
   // Ensure backup directory exists
-  if (!fs.existsSync(ARDENT_BACKUP_DIR)) {
-    fs.mkdirSync(ARDENT_BACKUP_DIR, { recursive: true })
+  if (!fs.existsSync(EDDATA_BACKUP_DIR)) {
+    fs.mkdirSync(EDDATA_BACKUP_DIR, { recursive: true })
   }
 
   const timestamp = new Date().toISOString().replace(/:/g, '-').split('.')[0]
-  const backupPath = path.join(ARDENT_BACKUP_DIR, `auth-${timestamp}.db`)
+  const backupPath = path.join(EDDATA_BACKUP_DIR, `auth-${timestamp}.db`)
 
   try {
     // Create backup
@@ -35,11 +35,11 @@ const {
 
     // Verify backup
     writeBackupLog('Verifying backup integrity...')
-    const minSize = fs.statSync(ARDENT_AUTH_DB).size * 0.9 // At least 90% of original
+    const minSize = fs.statSync(EDDATA_AUTH_DB).size * 0.9 // At least 90% of original
     verifyBackup(backupPath, ['sessions', 'cache'], minSize)
 
     // Create a "latest" symlink/copy for easy access
-    const latestPath = path.join(ARDENT_BACKUP_DIR, 'auth-latest.db')
+    const latestPath = path.join(EDDATA_BACKUP_DIR, 'auth-latest.db')
     if (fs.existsSync(latestPath)) {
       fs.unlinkSync(latestPath)
     }
@@ -49,13 +49,13 @@ const {
     const backupReport = {
       timestamp: new Date().toISOString(),
       backupFile: path.basename(backupPath),
-      originalSize: fs.statSync(ARDENT_AUTH_DB).size,
+      originalSize: fs.statSync(EDDATA_AUTH_DB).size,
       backupSize: fs.statSync(backupPath).size,
       success: true
     }
 
     fs.writeFileSync(
-      path.join(ARDENT_BACKUP_DIR, 'backup.json'),
+      path.join(EDDATA_BACKUP_DIR, 'backup.json'),
       JSON.stringify(backupReport, null, 2)
     )
 

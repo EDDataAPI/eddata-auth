@@ -7,14 +7,14 @@
 
 const fs = require('fs')
 const { authDb } = require('../../lib/db')
-const { ARDENT_DATABASE_STATS, ARDENT_CACHE_DIR } = require('../../lib/consts')
+const { EDDATA_DATABASE_STATS, EDDATA_CACHE_DIR } = require('../../lib/consts')
 
 ;(async () => {
   console.time('Update database stats')
 
   // Ensure cache directory exists
-  if (!fs.existsSync(ARDENT_CACHE_DIR)) {
-    fs.mkdirSync(ARDENT_CACHE_DIR, { recursive: true })
+  if (!fs.existsSync(EDDATA_CACHE_DIR)) {
+    fs.mkdirSync(EDDATA_CACHE_DIR, { recursive: true })
   }
 
   // Query session statistics
@@ -50,7 +50,7 @@ const { ARDENT_DATABASE_STATS, ARDENT_CACHE_DIR } = require('../../lib/consts')
     version: require('../../package.json').version
   }
 
-  fs.writeFileSync(ARDENT_DATABASE_STATS, JSON.stringify(stats, null, 2))
+  fs.writeFileSync(EDDATA_DATABASE_STATS, JSON.stringify(stats, null, 2))
   
   console.log('Statistics generated:')
   console.log(`  Total sessions: ${stats.sessions.total}`)
