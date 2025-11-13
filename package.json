@@ -7,6 +7,7 @@
     "start": "node index.js",
     "dev": "cross-env NODE_ENV=development node index.js",
     "dev:local": "cross-env NODE_ENV=development ARDENT_WWW_BASE_URL=http://localhost:3000 ARDENT_AUTH_BASE_URL=http://localhost:3003/auth ARDENT_AUTH_COOKIE_DOMAIN=.localhost node index.js",
+    "test": "npm run lint",
     "lint": "npx standard --fix",
     "backup": "node scripts/backup.js",
     "stats": "node scripts/stats/database-stats.js",
