@@ -11,8 +11,7 @@ const { authDb } = require('../lib/db')
 const { backupDatabase, verifyBackup, writeBackupLog } = require('../lib/backup')
 const {
   EDDATA_AUTH_DB,
-  EDDATA_BACKUP_DIR,
-  EDDATA_DATA_DIR
+  EDDATA_BACKUP_DIR
 } = require('../lib/consts')
 
 ;(async () => {
