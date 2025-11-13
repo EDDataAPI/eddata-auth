@@ -1,2 +1,14 @@
 node_modules
 .DS_Store
+*.log
+npm-debug.log*
+eddata-data/
+eddata-backup/
+.env
+.env.local
+.env.*.local
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
