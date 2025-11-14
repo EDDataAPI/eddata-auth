@@ -211,27 +211,7 @@ cat eddata-data/cache/database-stats.json
 
 ## 🐳 Docker Deployment
 
-### Dokploy (Recommended for Production)
-
-This project is optimized for deployment with [Dokploy](https://dokploy.com/):
-
-```bash
-# See DOKPLOY.md for detailed setup instructions
-```
-
-**Quick Setup:**
-1. Create project in Dokploy dashboard
-2. Connect GitHub repository
-3. Set environment variables (see DOKPLOY.md)
-4. Configure domain with automatic SSL
-5. Deploy
-
-The docker-compose.yml includes Traefik labels for:
-- Automatic SSL certificates (Let's Encrypt)
-- Load balancing and health checks
-- Security headers (HSTS, SSL redirect)
-
-### Manual Docker Deployment
+### Standard Docker Deployment
 
 ```bash
 # Build image
