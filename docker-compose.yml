@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   eddata-auth:
-    image: eddata-auth:latest
+    image: ghcr.io/eddataapi/eddata-auth:latest
     build:
       context: .
       dockerfile: Dockerfile
@@ -14,7 +14,7 @@ services:
       - NODE_ENV=production
       - EDDATA_AUTH_LOCAL_PORT=3003
       - EDDATA_DATA_DIR=/app/eddata-data
-      # Set these secrets via environment variables or a secrets manager:
+      # Required secrets - set via Dokploy environment variables:
       # - EDDATA_SESSION_SECRET
       # - EDDATA_AUTH_JWT_SECRET
       # - EDDATA_AUTH_CLIENT_ID
@@ -32,6 +32,11 @@ services:
       retries: 3
       start_period: 60s
     labels:
+      # Dokploy labels
+      - "dokploy.project=eddata"
+      - "dokploy.service=auth"
+      - "dokploy.type=application"
+      
       # Traefik labels for reverse proxy
       - "traefik.enable=true"
       - "traefik.http.routers.eddata-auth.rule=Host(`auth.eddata-api.com`)"
