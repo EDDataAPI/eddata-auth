@@ -39,7 +39,8 @@ module.exports = (router) => {
     ctx.redirect(url)
   })
 
-  router.get('/callback', async (ctx, next) => {
+  // Support both /callback and /auth/callback for compatibility
+  const handleCallback = async (ctx, next) => {
     const { code, state } = ctx.query
     const stateFromCookie = ctx.cookies.get('auth.state')
     const codeVerifier = ctx.cookies.get('auth.codeVerifier')
@@ -92,9 +93,13 @@ module.exports = (router) => {
 
       ctx.redirect(AUTH_SIGNED_IN_URL)
     } catch (e) {
+      console.error('OAuth callback error:', e)
       ctx.redirect(`${AUTH_ERROR_URL}?error=${encodeURIComponent(e?.toString())}`)
     }
-  })
+  }
+
+  router.get('/callback', handleCallback)
+  router.get('/auth/callback', handleCallback)
 
   // This is a really simple CSRF implementation, but this is very low stakes as
   // both the Ardent REST API and the Frontier REST API are read only and the
