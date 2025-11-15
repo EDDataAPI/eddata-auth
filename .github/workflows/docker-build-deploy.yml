@@ -49,10 +49,25 @@ jobs:
       
     outputs:
       image: ${{ steps.image.outputs.image }}
+      version: ${{ steps.version.outputs.version }}
       
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Generate Semantic Version
+      id: version
+      uses: paulhatch/semantic-version@v5.4.0
+      with:
+        tag_prefix: "v"
+        major_pattern: "(MAJOR)"
+        minor_pattern: "(MINOR)"
+        version_format: "${major}.${minor}.${patch}"
+        bump_each_commit: true
+        search_commit_body: true
+        user_format_type: "csv"
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
@@ -80,6 +95,15 @@ jobs:
           type=semver,pattern={{major}}
           type=sha,prefix={{branch}}-
           type=raw,value=latest,enable={{is_default_branch}}
+          type=raw,value=${{ steps.version.outputs.version }}
+
+    - name: Create Git Tag
+      if: github.ref == 'refs/heads/main'
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git tag -a "v${{ steps.version.outputs.version }}" -m "Release v${{ steps.version.outputs.version }}"
+        git push origin "v${{ steps.version.outputs.version }}"
 
     - name: Build and push Docker image
       id: build
@@ -93,7 +117,7 @@ jobs:
         build-args: |
           BUILD_DATE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
           VCS_REF=${{ github.sha }}
-          VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+          VERSION=${{ steps.version.outputs.version }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
