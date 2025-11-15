@@ -5,6 +5,8 @@
 
 Authentication service for EDData - providing secure OAuth integration with Frontier Developments' Elite Dangerous API.
 
+**Production Domain:** `https://auth.eddata.dev`
+
 ## 🚀 What's New in v3.0
 
 - **Node.js 24.11.0+** - Upgraded to latest LTS with performance improvements

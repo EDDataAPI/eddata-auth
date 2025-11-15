@@ -114,8 +114,6 @@ const cronTasks = require('./lib/cron-tasks')
       `Memory: ${memoryInfo.heapUsed}MB / ${memoryInfo.heapTotal}MB\n` +
       `Node.js: ${process.version}`
   })
-  router.get('/auth', (ctx) => { ctx.body = `EDData Authentication v${Package.version}` })
-  router.get('/auth/version', (ctx) => { ctx.body = { version: Package.version, node: process.version } })
   
   // Health check endpoint for load balancers (Node.js 24 optimized)
   router.get('/health', (ctx) => {
@@ -128,7 +126,7 @@ const cronTasks = require('./lib/cron-tasks')
     }
   })
 
-  app.use(router.routes())
+  app.use(router.routes()).use(router.allowedMethods())
 
   // Every 15 minutes check for any tokens that expire "soon" and preemptively refresh them
   // (and also at startup, in case there has been any downtime).

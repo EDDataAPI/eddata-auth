@@ -39,7 +39,7 @@ services:
       
       # Traefik labels for reverse proxy
       - "traefik.enable=true"
-      - "traefik.http.routers.eddata-auth.rule=Host(`auth.eddata-api.com`)"
+      - "traefik.http.routers.eddata-auth.rule=Host(`auth.eddata.dev`)"
       - "traefik.http.routers.eddata-auth.entrypoints=websecure"
       - "traefik.http.routers.eddata-auth.tls=true"
       - "traefik.http.routers.eddata-auth.tls.certresolver=letsencrypt"
