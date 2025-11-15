@@ -24,10 +24,12 @@ module.exports = (router) => {
       })
       ctx.body = await response.json()
     } catch (e) {
+      console.error('Error in /auth/cmdr:', e)
       ctx.status = 500
       ctx.body = {
         error: 'Frontier API request failed',
-        message: e?.toString()
+        message: e?.toString(),
+        stack: process.env.NODE_ENV === 'development' ? e?.stack : undefined
       }
     }
   })
@@ -37,11 +39,14 @@ module.exports = (router) => {
       const jwtPayload = await verifyJwt(ctx)
       const cmdrId = jwtPayload.sub
       deleteCache(cmdrId)
+      ctx.body = { success: true }
     } catch (e) {
+      console.error('Error in /auth/cmdr/delete:', e)
       ctx.status = 500
       ctx.body = {
         error: 'Delete API request failed',
-        message: e?.toString()
+        message: e?.toString(),
+        stack: process.env.NODE_ENV === 'development' ? e?.stack : undefined
       }
     }
   })
@@ -85,10 +90,12 @@ module.exports = (router) => {
 
       ctx.body = responseData
     } catch (e) {
+      console.error(`Error in /auth/cmdr/${ctx.params.endpoint}:`, e)
       ctx.status = 500
       ctx.body = {
         error: 'Frontier API request failed',
-        message: e?.toString()
+        message: e?.toString(),
+        stack: process.env.NODE_ENV === 'development' ? e?.stack : undefined
       }
     }
   })
@@ -103,10 +110,12 @@ module.exports = (router) => {
       })
       ctx.body = await response.text()
     } catch (e) {
+      console.error(`Error in /auth/cmdr/journal:`, e)
       ctx.status = 500
       ctx.body = {
         error: 'Frontier API request failed',
-        message: e?.toString()
+        message: e?.toString(),
+        stack: process.env.NODE_ENV === 'development' ? e?.stack : undefined
       }
     }
   })
