@@ -39,7 +39,7 @@ module.exports = (router) => {
     ctx.redirect(url)
   })
 
-  router.get('/auth/callback', async (ctx, next) => {
+  router.get('/callback', async (ctx, next) => {
     const { code, state } = ctx.query
     const stateFromCookie = ctx.cookies.get('auth.state')
     const codeVerifier = ctx.cookies.get('auth.codeVerifier')
