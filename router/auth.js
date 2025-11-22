@@ -60,7 +60,17 @@ module.exports = (router) => {
           code_verifier: codeVerifier
         })
       })
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(`Frontier token request failed: ${errorData.error || response.statusText}`)
+      }
+      
       const responsePayload = await response.json()
+
+      if (!responsePayload.access_token) {
+        throw new Error('No access token in Frontier response')
+      }
 
       const accessToken = responsePayload.access_token
       const refreshToken = responsePayload.refresh_token
@@ -71,7 +81,16 @@ module.exports = (router) => {
         `${FRONTIER_API_BASE_URL}/profile`,
         { headers: { Authorization: `Bearer ${accessToken}` } }
       )
+      
+      if (!frontierApiResponse.ok) {
+        throw new Error(`Frontier profile request failed: ${frontierApiResponse.statusText}`)
+      }
+      
       const profile = await frontierApiResponse.json()
+      
+      if (!profile?.commander?.id || !profile?.commander?.name) {
+        throw new Error('Invalid profile response: missing commander data')
+      }
 
       // Ensure cmdrId is always treated as a string and not a number
       const cmdrId = String(profile.commander.id)
