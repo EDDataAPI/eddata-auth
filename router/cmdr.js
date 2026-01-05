@@ -6,7 +6,6 @@ const CAPI_ENDPOINTS = [
   'profile',
   'market',
   'shipyard',
-  'profile',
   'communitygoals',
   'journal',
   'fleetcarrier',
@@ -35,11 +34,16 @@ module.exports = (router) => {
       ctx.body = await response.json()
     } catch (e) {
       console.error('Error in /auth/cmdr:', e)
-      ctx.status = 500
-      ctx.body = {
-        error: 'Frontier API request failed',
-        message: e?.toString(),
-        stack: process.env.NODE_ENV === 'development' ? e?.stack : undefined
+      if (e.message && (e.message.includes('JWT') || e.message.includes('signed in'))) {
+        ctx.status = 401
+        ctx.body = { error: 'Unauthorized', message: e.message }
+      } else {
+        ctx.status = 500
+        ctx.body = {
+          error: 'Frontier API request failed',
+          message: e?.toString(),
+          stack: process.env.NODE_ENV === 'development' ? e?.stack : undefined
+        }
       }
     }
   })
@@ -52,11 +56,16 @@ module.exports = (router) => {
       ctx.body = { success: true }
     } catch (e) {
       console.error('Error in /auth/cmdr/delete:', e)
-      ctx.status = 500
-      ctx.body = {
-        error: 'Delete API request failed',
-        message: e?.toString(),
-        stack: process.env.NODE_ENV === 'development' ? e?.stack : undefined
+      if (e.message && (e.message.includes('JWT') || e.message.includes('signed in'))) {
+        ctx.status = 401
+        ctx.body = { error: 'Unauthorized', message: e.message }
+      } else {
+        ctx.status = 500
+        ctx.body = {
+          error: 'Delete API request failed',
+          message: e?.toString(),
+          stack: process.env.NODE_ENV === 'development' ? e?.stack : undefined
+        }
       }
     }
   })
@@ -100,22 +109,32 @@ module.exports = (router) => {
         if (endpoint === 'journal') {
           responseData = await response.text()
         } else if (endpoint === 'visitedstars') {
-          responseData = await response.blob()
+          // visitedstars returns a gzip compressed file
+          const buffer = await response.arrayBuffer()
+          responseData = Buffer.from(buffer)
+          ctx.set('Content-Type', 'application/gzip')
         } else {
           responseData = await response.json()
         }
-        // Add response to CAPI cache
-        setCache(cmdrId, endpoint, responseData)
+        // Add response to CAPI cache (don't cache visitedstars due to size)
+        if (endpoint !== 'visitedstars') {
+          setCache(cmdrId, endpoint, responseData)
+        }
       }
 
       ctx.body = responseData
     } catch (e) {
       console.error(`Error in /auth/cmdr/${ctx.params.endpoint}:`, e)
-      ctx.status = 500
-      ctx.body = {
-        error: 'Frontier API request failed',
-        message: e?.toString(),
-        stack: process.env.NODE_ENV === 'development' ? e?.stack : undefined
+      if (e.message && (e.message.includes('JWT') || e.message.includes('signed in'))) {
+        ctx.status = 401
+        ctx.body = { error: 'Unauthorized', message: e.message }
+      } else {
+        ctx.status = 500
+        ctx.body = {
+          error: 'Frontier API request failed',
+          message: e?.toString(),
+          stack: process.env.NODE_ENV === 'development' ? e?.stack : undefined
+        }
       }
     }
   })
@@ -141,11 +160,16 @@ module.exports = (router) => {
       ctx.body = await response.text()
     } catch (e) {
       console.error('Error in /auth/cmdr/journal:', e)
-      ctx.status = 500
-      ctx.body = {
-        error: 'Frontier API request failed',
-        message: e?.toString(),
-        stack: process.env.NODE_ENV === 'development' ? e?.stack : undefined
+      if (e.message && (e.message.includes('JWT') || e.message.includes('signed in'))) {
+        ctx.status = 401
+        ctx.body = { error: 'Unauthorized', message: e.message }
+      } else {
+        ctx.status = 500
+        ctx.body = {
+          error: 'Frontier API request failed',
+          message: e?.toString(),
+          stack: process.env.NODE_ENV === 'development' ? e?.stack : undefined
+        }
       }
     }
   })
