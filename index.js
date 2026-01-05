@@ -93,7 +93,10 @@ const cronTasks = require('./lib/cron-tasks')
 
     // Headers required to support requests with credentials (i.e. auth tokens)
     // while still supporting API requests from any domain
-    ctx.set('Access-Control-Allow-Origin', ctx.request.header.origin)
+    const origin = ctx.request.header.origin
+    if (origin) {
+      ctx.set('Access-Control-Allow-Origin', origin)
+    }
     ctx.set('Access-Control-Allow-Credentials', true)
     ctx.set('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
     ctx.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
