@@ -19,9 +19,19 @@ module.exports = (router) => {
     try {
       const jwtPayload = await verifyJwt(ctx)
       const accessToken = await getAccessToken(jwtPayload.sub)
+      if (!accessToken) {
+        ctx.status = 401
+        ctx.body = { error: 'No valid access token found' }
+        return
+      }
       const response = await fetch(FRONTIER_API_BASE_URL, {
         headers: { Authorization: `Bearer ${accessToken}` }
       })
+      if (!response.ok) {
+        ctx.status = response.status
+        ctx.body = { error: 'Frontier API request failed', status: response.status }
+        return
+      }
       ctx.body = await response.json()
     } catch (e) {
       console.error('Error in /auth/cmdr:', e)
@@ -67,16 +77,26 @@ module.exports = (router) => {
       const cmdrId = jwtPayload.sub
 
       let responseData
-      
+
       // Check cache to limit frequency of requests to the Frontier API
       const cachedResponse = getCache(cmdrId, endpoint)
       if (cachedResponse !== undefined) {
         responseData = cachedResponse
       } else {
         const accessToken = await getAccessToken(cmdrId)
+        if (!accessToken) {
+          ctx.status = 401
+          ctx.body = { error: 'No valid access token found' }
+          return
+        }
         const response = await fetch(`${FRONTIER_API_BASE_URL}/${endpoint}`, {
           headers: { Authorization: `Bearer ${accessToken}` }
         })
+        if (!response.ok) {
+          ctx.status = response.status
+          ctx.body = { error: 'Frontier API request failed', status: response.status }
+          return
+        }
         if (endpoint === 'journal') {
           responseData = await response.text()
         } else if (endpoint === 'visitedstars') {
@@ -104,13 +124,23 @@ module.exports = (router) => {
     try {
       const jwtPayload = await verifyJwt(ctx)
       const accessToken = await getAccessToken(jwtPayload.sub)
+      if (!accessToken) {
+        ctx.status = 401
+        ctx.body = { error: 'No valid access token found' }
+        return
+      }
       const { year, month, day } = ctx.params
       const response = await fetch(`${FRONTIER_API_BASE_URL}/journal/${year}/${month}/${day}`, {
         headers: { Authorization: `Bearer ${accessToken}` }
       })
+      if (!response.ok) {
+        ctx.status = response.status
+        ctx.body = { error: 'Frontier API request failed', status: response.status }
+        return
+      }
       ctx.body = await response.text()
     } catch (e) {
-      console.error(`Error in /auth/cmdr/journal:`, e)
+      console.error('Error in /auth/cmdr/journal:', e)
       ctx.status = 500
       ctx.body = {
         error: 'Frontier API request failed',

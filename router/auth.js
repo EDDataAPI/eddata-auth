@@ -60,12 +60,12 @@ module.exports = (router) => {
           code_verifier: codeVerifier
         })
       })
-      
+
       if (!response.ok) {
-        const errorData = await response.json()
+        const errorData = await response.json().catch(() => ({}))
         throw new Error(`Frontier token request failed: ${errorData.error || response.statusText}`)
       }
-      
+
       const responsePayload = await response.json()
 
       if (!responsePayload.access_token) {
@@ -81,13 +81,15 @@ module.exports = (router) => {
         `${FRONTIER_API_BASE_URL}/profile`,
         { headers: { Authorization: `Bearer ${accessToken}` } }
       )
-      
+
       if (!frontierApiResponse.ok) {
         throw new Error(`Frontier profile request failed: ${frontierApiResponse.statusText}`)
       }
-      
-      const profile = await frontierApiResponse.json()
-      
+
+      const profile = await frontierApiResponse.json().catch(() => {
+        throw new Error('Invalid profile response: could not parse JSON')
+      })
+
       if (!profile?.commander?.id || !profile?.commander?.name) {
         throw new Error('Invalid profile response: missing commander data')
       }

@@ -51,13 +51,13 @@ const { EDDATA_DATABASE_STATS, EDDATA_CACHE_DIR } = require('../../lib/consts')
   }
 
   fs.writeFileSync(EDDATA_DATABASE_STATS, JSON.stringify(stats, null, 2))
-  
+
   console.log('Statistics generated:')
   console.log(`  Total sessions: ${stats.sessions.total}`)
   console.log(`  Active (24h): ${stats.sessions.active24h}`)
   console.log(`  Unique commanders: ${stats.sessions.uniqueCommanders}`)
   console.log(`  Cache entries: ${stats.cache.total}`)
-  
+
   console.timeEnd('Update database stats')
   process.exit(0)
 })()

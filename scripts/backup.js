@@ -16,7 +16,7 @@ const {
 
 ;(async () => {
   console.time('Backup complete')
-  
+
   writeBackupLog('Starting backup process', true)
 
   // Ensure backup directory exists

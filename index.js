@@ -85,7 +85,7 @@ const cronTasks = require('./lib/cron-tasks')
   app.proxy = true // Proxy headers should be passed through
 
   // Set default headers
-  app.use((ctx, next) => {
+  app.use(async (ctx, next) => {
     ctx.set('EDData-Auth-Version', `${Package.version}`)
 
     // Requests made to the Authentication service should never be cached
@@ -93,19 +93,23 @@ const cronTasks = require('./lib/cron-tasks')
 
     // Headers required to support requests with credentials (i.e. auth tokens)
     // while still supporting API requests from any domain
-    const origin = ctx.request.header.origin
-    if (origin) {
-      ctx.set('Access-Control-Allow-Origin', origin)
-    }
+    const origin = ctx.request.header.origin || ctx.request.header.referer || '*'
+    ctx.set('Access-Control-Allow-Origin', origin)
     ctx.set('Access-Control-Allow-Credentials', true)
     ctx.set('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
     ctx.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+
+    // Handle OPTIONS preflight requests
+    if (ctx.method === 'OPTIONS') {
+      ctx.status = 204
+      return
+    }
 
     if (process.env.NODE_ENV !== 'development') {
       // Enable secure cookies when behind HTTP proxy in production
       ctx.cookies.secure = true
     }
-    return next()
+    await next()
   })
 
   // Add route handlers
@@ -117,7 +121,7 @@ const cronTasks = require('./lib/cron-tasks')
       `Memory: ${memoryInfo.heapUsed}MB / ${memoryInfo.heapTotal}MB\n` +
       `Node.js: ${process.version}`
   })
-  
+
   // Health check endpoint for load balancers (Node.js 24 optimized)
   router.get('/health', (ctx) => {
     ctx.body = {
@@ -139,7 +143,7 @@ const cronTasks = require('./lib/cron-tasks')
   })
 
   app.listen(EDDATA_AUTH_LOCAL_PORT)
-  
+
   performanceMark('app-ready')
   console.log('EDData Authentication service started!')
   console.log(`Listening on port ${EDDATA_AUTH_LOCAL_PORT}`)
